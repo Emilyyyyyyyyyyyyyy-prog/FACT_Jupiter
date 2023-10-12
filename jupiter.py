@@ -1,12 +1,13 @@
+import numpy
+
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-import pygame
 import time
 
-pygame.init()
-screen = pygame.display.set_mode((1200, 640))
-run = True
+# pygame.init()
+# screen = pygame.display.set_mode((1200, 640))
+# run = True
 
 G = 6.67e-11  # гравитационная постоянная
 M_earth = 5.974e24  # масса Земли
@@ -40,7 +41,7 @@ trace = []  # координаты точек для прорисовки гра
 
 # v = np.array()
 
-def dist(X, Y):  # расчёт расстояния до центра координат (Солнца)
+def r_sun(X, Y):  # расчёт расстояния до центра координат (Солнца)
     return (X ** 2 + Y ** 2) ** 0.5
 
 
@@ -49,11 +50,11 @@ def f_earth():  # сила гравитационного притяжения �
 
 
 def f_jupiter():  # сила гравитационного притяжения Юпитера
-    return G * M_jupiter * m / (dist(x - x_j, y - y_j) ** 2)
+    return G * M_jupiter * m / (r_sun(x - x_j, y - y_j) ** 2)
 
 
 def f_sun():  # сила гравитационного притяжения Солнца
-    return G * M_sun * m / (dist(x, y) ** 2)
+    return G * M_sun * m / (r_sun(x, y) ** 2)
 
 
 def maneuver():  # если сила притяжения Юпитера становится больше, чем Солнца, начинается гравитационный маневр
@@ -77,6 +78,14 @@ def move_jupiter():
         y_j += dy_jup
 
 
+def dist_vecs(a, b):
+    return np.norm(a - b, ord=4)
+
+
+def ang_vecs(a, b):
+    return numpy.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+
 # def move():  # расчёт перемещения
 #     global v, x, y
 #     a = acc()
@@ -87,7 +96,7 @@ def move_jupiter():
 #     return x, y
 
 f1, ax1 = plt.subplots()
-f2, ax2 = plt.subplots()
+# f2, ax2 = plt.subplots()
 
 # красным цветом показаны орбиты планет: Земля, Юпитер и Плутон
 x_e1 = np.linspace(-1, 1, 100)
@@ -118,23 +127,27 @@ e = 1 - (q / a)
 b = a * (1 - e) ** 0.5
 v = (a - 1)
 u = 0.
-pi = 3.1415
+pi = np.pi
 t = np.linspace(-pi / 2, pi / 2, 50)
 gom = np.array([b * np.cos(t), a * np.sin(t)])
 ax1.plot(u + gom[0, :], v + gom[1, :], color="blue")
 ax1.scatter(u + gom[0, :], v + gom[1, :], color="blue", marker="*")
 
 #  зеленым цветом показана траектория с применением гравитационного маневра
-a = (r_plut + 2 * r_earth) / 2 / k - 0.5  # почему -0.5???
+a = (r_plut + r_earth) / 2 / k
 q = r_earth / k
 e = 1 - (q / a)
-b = a * (1 - e) ** 0.5
+b = a * (1 - e ** 2) ** 0.5
+x_j_ = (a / (b - a) * (b - (r_jup / k) ** 2)) ** 0.5
+y_j_ = ((r_jup / k) ** 2 - x_j_ ** 2) ** 0.5
 v = (a - 1)
 u = 0.
 pi = 3.1415
-t = np.linspace(-pi / 2, -pi / 3.7, 100)  # необходим точный расчет угла!!!!!!!!!
+alpha = math.atan(x / y)
+print(alpha, pi / 3.7)
+t = np.linspace(-pi / 2, -pi / 3.7, 100)
 gom = np.array([b * np.cos(t), a * np.sin(t)])
-ax1.plot(u + gom[0, :], v + gom[1, :], color="green")
+# ax1.plot(u + gom[0, :], v + gom[1, :], color="green")
 # формула для гиперболы: x**2 / a**2 - y**2 / b**2 = 1
 # гипербола рисуется из списка координат траектории КА
 # x_g = np.linspace(-6, 6, 100)
@@ -144,16 +157,16 @@ ax1.plot(u + gom[0, :], v + gom[1, :], color="green")
 plt.show()
 
 # отдельный график, показывающий маневр
-x_j_b = np.linspace(-r_jup / k, r_jup / k, 100)
-y_j_b_up = np.array([((r_jup / k) ** 2 - x_j_b[i] ** 2) ** 0.5 for i in range(len(x_j_b))])
-y_j_b_down = np.array([-((r_jup / k) ** 2 - x_j_b[i] ** 2) ** 0.5 for i in range(len(x_j_b))])
-ax2.plot(x_j_b, y_j_b_up, color='red')
-ax2.plot(x_j_b, y_j_b_down, color='red')
-print(x_j_b)
-print(y_j_b_up)
-print(y_j_b_down)
+# x_j_b = np.linspace(-r_jup / k, r_jup / k, 100)
+# y_j_b_up = np.array([((r_jup / k) ** 2 - x_j_b[i] ** 2) ** 0.5 for i in range(len(x_j_b))])
+# y_j_b_down = np.array([-((r_jup / k) ** 2 - x_j_b[i] ** 2) ** 0.5 for i in range(len(x_j_b))])
+# ax2.plot(x_j_b, y_j_b_up, color='red')
+# ax2.plot(x_j_b, y_j_b_down, color='red')
+# print(x_j_b)
+# print(y_j_b_up)
+# print(y_j_b_down)
 
-plt.show()
+# plt.show()
 
 # анимация гравитационного маневра
 # start_move = False
