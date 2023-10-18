@@ -33,13 +33,14 @@ x, y = 0, r_earth / k
 coord_ka = (0, r_earth / k)  # координаты КА
 coord_jup = (0, r_jup / k)  # координаты Юпитера - необходимо найти маленьким школьникам
 
-dt = 0.1  # за 0.1 секунду проходит сидерический год
-m = 0  # масса КА
-
 trace = []  # координаты точек для прорисовки графика
 
+pos_vel = np.ndarray(shape=(500000, 4), dtype=float)
+pos_vel[0] = np.array([r_earth, 0, 0, 0])
+time = np.ndarray(shape=(500000,), dtype=float)
+dtime = 5
+m = 10000  # масса КА
 
-# v = np.array()
 
 def r_sun(X, Y):  # расчёт расстояния до центра координат (Солнца)
     return (X ** 2 + Y ** 2) ** 0.5
@@ -64,26 +65,42 @@ def maneuver():  # если сила притяжения Юпитера ста�
         return False
 
 
-def move_jupiter():
-    dx_jup = dt / T_jup * r_jup / k
-    dy_jup = ((r_jup / k) ** 2 - dx_jup ** 2) ** 0.5
-    if x_j + dx_jup >= r_jup / k:
-        x_j -= dx_jup
-    else:
-        x_j += dx_jup
+#
+# def move_jupiter():
+#     dx_jup = dtime / T_jup * r_jup / k
+#     dy_jup = ((r_jup / k) ** 2 - dx_jup ** 2) ** 0.5
+#     if x_j + dx_jup >= r_jup / k:
+#         x_j -= dx_jup
+#     else:
+#         x_j += dx_jup
+#
+#     if y_j + dy_jup >= r_jup / k:
+#         y_j -= dy_jup
+#     else:
+#         y_j += dy_jup
 
-    if y_j + dy_jup >= r_jup / k:
-        y_j -= dy_jup
-    else:
-        y_j += dy_jup
 
-
-def dist_vecs(a, b):
+def dist_vecs(a, b):  # расстояние между векторами
     return np.norm(a - b, ord=4)
 
 
-def ang_vecs(a, b):
+def ang_vecs(a, b):  # угол между векторами
     return numpy.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+
+def where_jupiter(time):
+    fas_0 = ang_vecs((x, y), (x_j, y_j))
+    return r_jup * np.array(
+        [np.cos(fas_0 + time / T_jup), np.sin(fas_0 + time / T_jup)])
+
+
+def accel(pos_vel, isOn):  # ускорение КА
+    pos_norm = np.linalg.norm(pos_vel[:2])
+    vel_norm = np.linalg.norm(pos_vel[2:])
+
+
+def move():  # главная функция движения
+    pass
 
 
 # def move():  # расчёт перемещения
