@@ -138,7 +138,7 @@ y_p_2 = np.array([-((r_plut / k) ** 2 - x_p_i ** 2) ** 0.5 for x_p_i in x_p_2])
 ax1.plot(x_p_2, y_p_2, color="red")
 
 # синим цветом показана гомановская орбита от Земли до Плутона
-a = (r_plut + 2 * r_earth) / 2 / k - 0.5  # почему -0.5???
+a = (r_plut + r_earth) / 2 / k
 q = r_earth / k
 e = 1 - (q / a)
 b = a * (1 - e) ** 0.5
